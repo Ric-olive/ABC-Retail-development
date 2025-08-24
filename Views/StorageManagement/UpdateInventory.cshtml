@@ -1,0 +1,87 @@
+@{
+    ViewData["Title"] = "Update Inventory - Azure Queue Storage";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4><i class="fas fa-boxes"></i> Queue Inventory Update - Azure Queue Storage</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateInventory" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="productId" class="form-label">Product ID</label>
+                                    <input type="text" class="form-control" id="productId" name="productId" 
+                                           placeholder="PROD-001" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="action" class="form-label">Action</label>
+                                    <select class="form-select" id="action" name="action" required>
+                                        <option value="">Select Action</option>
+                                        <option value="UpdateStock">Update Stock</option>
+                                        <option value="ReserveStock">Reserve Stock</option>
+                                        <option value="ReleaseStock">Release Stock</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" 
+                                           placeholder="0" min="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <input type="text" class="form-control" id="reason" name="reason" 
+                                           placeholder="e.g., New shipment, Sale, Return" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-plus"></i> Add to Queue
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-info-circle"></i> Azure Queue Storage - Inventory Management</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>What happens when you queue an inventory update:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Update message is added to "inventory-management" queue</li>
+                        <li><i class="fas fa-check text-success"></i> Message includes product ID, action, quantity, and reason</li>
+                        <li><i class="fas fa-check text-success"></i> Queue operation is logged to Azure Files</li>
+                        <li><i class="fas fa-check text-success"></i> Updates can be processed asynchronously</li>
+                        <li><i class="fas fa-check text-success"></i> Processing maintains inventory accuracy</li>
+                    </ul>
+                    <div class="alert alert-warning mt-3">
+                        <small><strong>Queue Name:</strong> inventory-management<br>
+                        <strong>Actions:</strong> UpdateStock, ReserveStock, ReleaseStock<br>
+                        <strong>Processing:</strong> FIFO with audit trail</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

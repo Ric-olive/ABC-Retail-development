@@ -1,0 +1,75 @@
+@model ABC_Retail.Models.Customer
+
+@{
+    ViewData["Title"] = "Add Customer - Azure Table Storage";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4><i class="fas fa-user-plus"></i> Add Customer Profile to Azure Table Storage</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddCustomer" method="post">
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">Full Name</label>
+                            <input asp-for="FullName" class="form-control" placeholder="Enter full name" required />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="customer@example.com" required />
+                            <small class="form-text text-muted">This will be used as the unique identifier (Row Key)</small>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PasswordHash" class="form-label">Password</label>
+                            <input asp-for="PasswordHash" class="form-control" type="password" placeholder="Enter password" required />
+                            <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-save"></i> Save to Table Storage
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-info-circle"></i> Azure Table Storage - Customer Profiles</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>What happens when you submit:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Customer profile is stored in Azure Table Storage</li>
+                        <li><i class="fas fa-check text-success"></i> Email is used as unique Row Key identifier</li>
+                        <li><i class="fas fa-check text-success"></i> Password is securely hashed before storage</li>
+                        <li><i class="fas fa-check text-success"></i> Registration operation is logged to Azure Files</li>
+                        <li><i class="fas fa-check text-success"></i> Customer is marked as active with registration timestamp</li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <small><strong>Table Name:</strong> Customers<br>
+                        <strong>Partition Key:</strong> "Customer"<br>
+                        <strong>Row Key:</strong> Email address<br>
+                        <strong>Security:</strong> SHA256 password hashing</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

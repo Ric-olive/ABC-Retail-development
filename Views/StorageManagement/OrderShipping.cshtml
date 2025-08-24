@@ -1,0 +1,153 @@
+@{
+    ViewData["Title"] = "Order Shipping Management - Queue Processing";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-shipping-fast"></i> Order Shipping Management</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Info"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle"></i> @TempData["Info"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="ShipOrder" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="orderId" class="form-label">Order ID</label>
+                                    <input type="text" class="form-control" id="orderId" name="orderId" 
+                                           placeholder="ORD-001" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="trackingNumber" class="form-label">Tracking Number</label>
+                                    <input type="text" class="form-control" id="trackingNumber" name="trackingNumber" 
+                                           placeholder="TRK123456789" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="carrier" class="form-label">Shipping Carrier</label>
+                                    <select class="form-select" id="carrier" name="carrier" required>
+                                        <option value="">Select Carrier</option>
+                                        <option value="DHL">DHL</option>
+                                        <option value="FedEx">FedEx</option>
+                                        <option value="UPS">UPS</option>
+                                        <option value="PostNet">PostNet</option>
+                                        <option value="Courier Guy">Courier Guy</option>
+                                        <option value="Dawn Wing">Dawn Wing</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="estimatedDelivery" class="form-label">Estimated Delivery Date</label>
+                                    <input type="date" class="form-control" id="estimatedDelivery" name="estimatedDelivery" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="shippingNotes" class="form-label">Shipping Notes (Optional)</label>
+                            <textarea class="form-control" id="shippingNotes" name="shippingNotes" rows="3" 
+                                      placeholder="Special delivery instructions, package details, etc."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-shipping-fast"></i> Mark as Shipped
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-info-circle"></i> Order Shipping Process</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>What happens when you ship an order:</strong></p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Order status updated to "Shipped"</li>
+                                <li><i class="fas fa-check text-success"></i> Order lifecycle message queued</li>
+                                <li><i class="fas fa-check text-success"></i> Admin activity logged</li>
+                                <li><i class="fas fa-check text-success"></i> Shipping details recorded</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Queue Messages Generated:</strong></p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-info"></i> Order Lifecycle Queue</li>
+                                <li><i class="fas fa-arrow-right text-info"></i> Admin Activity Queue</li>
+                                <li><i class="fas fa-arrow-right text-info"></i> Operation logged to Azure Files</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <form asp-action="ProcessNextLifecycleEvent" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-play"></i> Process Next Lifecycle Event
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <form asp-action="ProcessNextAdminActivity" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-user-cog"></i> Process Admin Activity
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("ViewLogs")" class="btn btn-outline-info w-100">
+                                <i class="fas fa-file-alt"></i> View Activity Logs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

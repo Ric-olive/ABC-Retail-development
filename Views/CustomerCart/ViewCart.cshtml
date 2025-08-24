@@ -1,0 +1,381 @@
+@model List<ABC_Retail.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Shopping Cart - ABC Retail";
+    var total = Model.Sum(i => i.Price * i.Quantity);
+    var itemCount = Model.Sum(i => i.Quantity);
+}
+
+<div class="cart-container" style="background: #f8f9fa; min-height: 100vh; padding: 2rem 0;">
+    <div class="container">
+        <!-- Cart Header -->
+        <div class="cart-header mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">
+                        <i class="bi bi-cart3 me-3" style="color: #FF9900;"></i>Shopping Cart
+                    </h1>
+                    <p class="text-muted mb-0" style="font-family: 'Inter', sans-serif;">
+                        @if (Model.Any())
+                        {
+                            @($"{itemCount} item{(itemCount != 1 ? "s" : "")} in your cart")
+                        }
+                        else
+                        {
+                            @("Your cart is empty")
+                        }
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <!-- Empty Cart State -->
+            <div class="empty-cart-container" style="background: white; border-radius: 16px; padding: 4rem 2rem; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <div class="empty-cart-icon mb-4">
+                    <i class="bi bi-cart-x" style="font-size: 5rem; color: #e9ecef;"></i>
+                </div>
+                <h3 class="h4 fw-bold text-dark mb-3" style="font-family: 'Inter', sans-serif;">Your cart is empty</h3>
+                <p class="text-muted mb-4" style="font-family: 'Inter', sans-serif;">
+                    Looks like you haven't added anything to your cart yet. Start shopping to fill it up!
+                </p>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg" 
+                   style="background: linear-gradient(135deg, #FF9900 0%, #e68900 100%); border: none; border-radius: 8px; padding: 1rem 2rem; font-weight: 600; font-family: 'Inter', sans-serif;">
+                    <i class="bi bi-bag-heart me-2"></i>Start Shopping
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <!-- Cart Items -->
+                <div class="col-lg-8 mb-4">
+                    <div class="cart-items" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                        <h4 class="fw-bold text-dark mb-4" style="font-family: 'Inter', sans-serif;">Items in Your Cart</h4>
+                        
+                        @foreach (var item in Model)
+                        {
+                            <div class="cart-item" style="border-bottom: 1px solid #e9ecef; padding: 1.5rem 0; transition: all 0.3s ease;">
+                                <div class="row align-items-center">
+                                    <!-- Product Image -->
+                                    <div class="col-md-2 mb-3 mb-md-0">
+                                        @if (!string.IsNullOrWhiteSpace(item.ProductImageUrl))
+                                        {
+                                            <img src="@item.ProductImageUrl" alt="@item.ProductName" class="product-image" 
+                                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e9ecef;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="product-image-placeholder" 
+                                                 style="width: 80px; height: 80px; background: linear-gradient(45deg, #f8f9fa, #e9ecef); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #e9ecef;">
+                                                <i class="bi bi-image" style="font-size: 1.5rem; color: #6c757d;"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    
+                                    <!-- Product Details -->
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <h6 class="fw-bold text-dark mb-1" style="font-family: 'Inter', sans-serif;">@item.ProductName</h6>
+                                        <small class="text-muted">Added on @item.AddedOn.ToLocalTime().ToString("MMM dd, yyyy")</small>
+                                        <div class="mt-2">
+                                            <span class="badge bg-light text-dark" style="font-size: 0.75rem;">In Stock</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Quantity Controls -->
+                                    <div class="col-md-3 mb-3 mb-md-0">
+                                        <label class="form-label small text-muted mb-2" style="font-family: 'Inter', sans-serif;">Quantity</label>
+                                        <div class="input-group" style="max-width: 120px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" onclick="updateQuantity('@item.RowKey', @(item.Quantity - 1))" 
+                                                    style="border-radius: 6px 0 0 6px; border-color: #e9ecef;">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="number" class="form-control quantity-input" value="@item.Quantity" min="1" 
+                                                   onchange="updateQuantity('@item.RowKey', this.value)" 
+                                                   style="text-align: center; border-color: #e9ecef;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" onclick="updateQuantity('@item.RowKey', @(item.Quantity + 1))" 
+                                                    style="border-radius: 0 6px 6px 0; border-color: #e9ecef;">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Price and Actions -->
+                                    <div class="col-md-3 text-md-end">
+                                        <div class="price mb-2">
+                                            <span class="h6 fw-bold text-primary" style="font-family: 'Inter', sans-serif;">
+                                                @((item.Price * item.Quantity).ToString("C"))
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">@item.Price.ToString("C") each</small>
+                                        </div>
+                                        <button type="button" class="btn btn-link text-danger p-0 remove-btn" 
+                                                onclick="removeFromCart('@item.RowKey')"
+                                                style="font-family: 'Inter', sans-serif; font-size: 0.9rem; text-decoration: none;">
+                                            <i class="bi bi-trash3 me-1"></i>Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <div class="order-summary" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: sticky; top: 2rem;">
+                        <h4 class="fw-bold text-dark mb-4" style="font-family: 'Inter', sans-serif;">Order Summary</h4>
+                        
+                        <!-- Summary Details -->
+                        <div class="summary-details mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted" style="font-family: 'Inter', sans-serif;">Items (@itemCount)</span>
+                                <span class="fw-semibold" style="font-family: 'Inter', sans-serif;">@total.ToString("C")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted" style="font-family: 'Inter', sans-serif;">Shipping</span>
+                                <span class="fw-semibold text-success" style="font-family: 'Inter', sans-serif;">FREE</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted" style="font-family: 'Inter', sans-serif;">Tax</span>
+                                <span class="fw-semibold" style="font-family: 'Inter', sans-serif;">@((total * 0.15m).ToString("C"))</span>
+                            </div>
+                            <hr style="border-color: #e9ecef;">
+                            <div class="d-flex justify-content-between">
+                                <span class="h6 fw-bold text-dark" style="font-family: 'Inter', sans-serif;">Total</span>
+                                <span class="h5 fw-bold text-primary" style="font-family: 'Inter', sans-serif;">@((total * 1.15m).ToString("C"))</span>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code -->
+                        <div class="promo-code mb-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Promo code" 
+                                       style="border: 2px solid #e9ecef; border-radius: 8px 0 0 8px; font-family: 'Inter', sans-serif;">
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        style="border: 2px solid #e9ecef; border-left: none; border-radius: 0 8px 8px 0; font-family: 'Inter', sans-serif;">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <form asp-controller="Checkout" asp-action="ProceedToCheckout" method="post" id="checkout-form">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-primary w-100 checkout-btn mb-3" 
+                                    style="background: linear-gradient(135deg, #FF9900 0%, #e68900 100%); border: none; border-radius: 8px; padding: 1rem; font-size: 1.1rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3);">
+                                <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                            </button>
+                        </form>
+
+                        <!-- Security Notice -->
+                        <div class="security-notice text-center">
+                            <small class="text-muted d-flex align-items-center justify-content-center" style="font-family: 'Inter', sans-serif;">
+                                <i class="bi bi-shield-check me-2" style="color: #28a745;"></i>
+                                Secure 256-bit SSL encryption
+                            </small>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="payment-methods mt-3 text-center">
+                            <small class="text-muted mb-2 d-block" style="font-family: 'Inter', sans-serif;">We accept</small>
+                            <div class="payment-icons">
+                                <i class="bi bi-credit-card me-2" style="color: #6c757d; font-size: 1.2rem;"></i>
+                                <i class="bi bi-paypal me-2" style="color: #6c757d; font-size: 1.2rem;"></i>
+                                <i class="bi bi-apple me-2" style="color: #6c757d; font-size: 1.2rem;"></i>
+                                <i class="bi bi-google me-2" style="color: #6c757d; font-size: 1.2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Cart Page Specific Styles */
+    .cart-item:hover {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin: 0 -1rem;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .quantity-btn:hover {
+        background-color: #FF9900 !important;
+        border-color: #FF9900 !important;
+        color: white !important;
+    }
+
+    .quantity-input:focus {
+        border-color: #FF9900 !important;
+        box-shadow: none !important;
+    }
+
+    .remove-btn:hover {
+        color: #dc3545 !important;
+        text-decoration: underline !important;
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4) !important;
+        background: linear-gradient(135deg, #e68900 0%, #cc7700 100%) !important;
+    }
+
+    .checkout-btn:active {
+        transform: translateY(0);
+    }
+
+    .empty-cart-container {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .cart-items {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .order-summary {
+        animation: slideUp 0.6s ease-out 0.2s both;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .cart-container {
+            padding: 1rem 0 !important;
+        }
+        
+        .cart-items,
+        .order-summary {
+            padding: 1.5rem !important;
+        }
+        
+        .cart-item {
+            padding: 1rem 0 !important;
+        }
+        
+        .order-summary {
+            position: static !important;
+        }
+    }
+</style>
+
+<script>
+    function updateQuantity(productId, quantity) {
+        if (quantity < 1) {
+            removeFromCart(productId);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('productId', productId);
+        formData.append('quantity', quantity);
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+        fetch('/CustomerCart/UpdateQuantity', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCartBadge(data.cartCount);
+                showToast('success', data.message);
+                location.reload();
+            } else {
+                showToast('error', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Failed to update quantity');
+        });
+    }
+
+    function removeFromCart(productId) {
+        if (!confirm('Are you sure you want to remove this item from your cart?')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('productId', productId);
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+        fetch('/CustomerCart/RemoveFromCart', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCartBadge(data.cartCount);
+                showToast('success', data.message);
+                location.reload();
+            } else {
+                showToast('error', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Failed to remove item');
+        });
+    }
+
+    // Debug checkout form submission
+    document.getElementById('checkout-form')?.addEventListener('submit', function(e) {
+        console.log('DEBUG: Form submission started');
+        console.log('DEBUG: Form action:', this.action);
+        console.log('DEBUG: Form method:', this.method);
+        
+        const button = this.querySelector('.checkout-btn');
+        button.innerHTML = '<i class="bi bi-arrow-repeat"></i> Processing...';
+        button.disabled = true;
+        
+        // Check if we have items in cart
+        const cartItems = document.querySelectorAll('.cart-item');
+        console.log('DEBUG: Cart items found:', cartItems.length);
+        
+        if (cartItems.length === 0) {
+            e.preventDefault();
+            console.log('DEBUG: No items in cart, preventing submission');
+            showToast('error', 'Your cart is empty');
+            button.innerHTML = '<i class="bi bi-credit-card me-2"></i>Proceed to Checkout';
+            button.disabled = false;
+            return;
+        }
+        
+        console.log('DEBUG: Submitting form to server...');
+    });
+</script>
+
+@Html.AntiForgeryToken()

@@ -1,0 +1,159 @@
+@model List<string>
+
+@{
+    ViewData["Title"] = "View Log Files - Azure File Storage";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4><i class="fas fa-file-alt"></i> Azure File Storage - Log Files</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Log Type Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="logTypeSelect" class="form-label">Filter by Log Type:</label>
+                            <select class="form-select" id="logTypeSelect" onchange="filterLogs()">
+                                @foreach (var logType in ViewBag.LogTypes)
+                                {
+                                    if (logType == ViewBag.LogType)
+                                    {
+                                        <option value="@logType" selected>@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(logType.ToLower())</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@logType">@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(logType.ToLower())</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Log Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var logFile in Model)
+                                    {
+                                        var parts = logFile.Split('/');
+                                        var logType = parts[0];
+                                        var fileName = parts[1];
+                                        
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-file-alt text-secondary"></i>
+                                                @fileName
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@logType</span>
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("ViewLogFile", new { filePath = logFile })" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            No log files found for "@ViewBag.LogType" category.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Create New Log Entry -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-plus"></i> Create New Log Entry</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateLogEntry" method="post">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="logType" class="form-label">Log Type</label>
+                                    <select class="form-select" name="logType" required>
+                                        @foreach (var logType in ViewBag.LogTypes)
+                                        {
+                                            <option value="@logType">@System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(logType.ToLower())</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="fileName" class="form-label">File Name</label>
+                                    <input type="text" class="form-control" name="fileName" 
+                                           placeholder="e.g., manual_entry.log" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Log Content</label>
+                            <textarea class="form-control" name="content" rows="4" 
+                                      placeholder="Enter log content..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> Create Log File
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6><i class="fas fa-info-circle"></i> Azure File Storage Information</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Log file management features:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Files are stored in Azure File Share: "application-logs"</li>
+                        <li><i class="fas fa-check text-success"></i> Organized by log type in separate directories</li>
+                        <li><i class="fas fa-check text-success"></i> Automatic timestamp prefixing for unique filenames</li>
+                        <li><i class="fas fa-check text-success"></i> Full file content viewing and management</li>
+                        <li><i class="fas fa-check text-success"></i> Support for manual log entry creation</li>
+                    </ul>
+                    <div class="alert alert-secondary mt-3">
+                        <small><strong>Share Name:</strong> application-logs<br>
+                        <strong>Directory Structure:</strong> /logType/timestamp_filename<br>
+                        <strong>File Format:</strong> Plain text with UTF-8 encoding</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterLogs() {
+        var logType = document.getElementById('logTypeSelect').value;
+        window.location.href = '@Url.Action("ViewLogs")?logType=' + logType;
+    }
+</script>
+
+

@@ -1,0 +1,246 @@
+@model List<ABC_Retail.Models.Product>
+@{
+    ViewData["Title"] = "ABC Retail - Your Premier Shopping Destination";
+    var email = Context.Session.GetString("CustomerEmail");
+    var categories = Model.Select(p => p.Category).Distinct().ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" />
+}
+
+@section Scripts {
+    <script src="~/js/home.js"></script>
+}
+
+<!-- Hero Banner Section -->
+<div class="hero-banner" style="background: linear-gradient(135deg, #232F3E 0%, #37475A 50%, #FF9900 100%); color: white; padding: 5rem 0; margin-bottom: 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-3 fw-bold mb-4" style="font-family: 'Inter', sans-serif; line-height: 1.2;">
+                    Discover Amazing Products
+                </h1>
+                <p class="lead mb-4" style="font-size: 1.25rem; opacity: 0.95;">
+                    Shop the latest trends with fast, free shipping and unbeatable prices. Your satisfaction is our priority.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-truck me-2" style="font-size: 1.5rem; color: #FF9900;"></i>
+                        <span style="font-weight: 500;">Free 2-Day Shipping</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-check me-2" style="font-size: 1.5rem; color: #FF9900;"></i>
+                        <span style="font-weight: 500;">Secure Checkout</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-arrow-clockwise me-2" style="font-size: 1.5rem; color: #FF9900;"></i>
+                        <span style="font-weight: 500;">30-Day Returns</span>
+                    </div>
+                </div>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg px-5 py-3" style="background-color: #FF9900; border-color: #FF9900; font-weight: 600; border-radius: 8px;">
+                    <i class="bi bi-bag-heart me-2"></i>Shop Now
+                </a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-image-container" style="position: relative;">
+                    <div class="floating-cards">
+                        <div class="floating-card" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); animation: float 3s ease-in-out infinite;">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <small class="text-dark fw-bold">4.9/5 Rating</small>
+                        </div>
+                        <div class="floating-card" style="position: absolute; bottom: 40px; left: 20px; background: rgba(255,255,255,0.95); padding: 1rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); animation: float 3s ease-in-out infinite 1.5s;">
+                            <i class="bi bi-people-fill text-primary"></i>
+                            <small class="text-dark fw-bold">10K+ Customers</small>
+                        </div>
+                    </div>
+                    <i class="bi bi-bag-heart" style="font-size: 12rem; opacity: 0.3; animation: pulse 2s ease-in-out infinite;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="search-filter-section" style="background: #f8f9fa; padding: 3rem 0; border-bottom: 1px solid #e9ecef;">
+    <div class="container">
+        <div class="row">
+            <!-- Enhanced Search Bar -->
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="search-container" style="position: relative;">
+                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <input type="text" id="searchInput" class="form-control search-input" placeholder="Search for products, brands, and more..." 
+                               style="border: 2px solid #FF9900; border-right: none; padding: 1rem 1.5rem; font-size: 1.1rem; font-family: 'Inter', sans-serif;">
+                        <button class="btn search-btn" type="button" onclick="performSearch()" 
+                                style="background-color: #FF9900; border: 2px solid #FF9900; padding: 1rem 2rem; color: white; font-weight: 600;">
+                            <i class="bi bi-search me-2"></i>Search
+                        </button>
+                    </div>
+                    <div id="searchSuggestions" class="search-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 12px 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); z-index: 1000; display: none;"></div>
+                </div>
+            </div>
+            
+            <!-- Category Filters -->
+            <div class="col-lg-4">
+                <div class="filter-container">
+                    <label class="form-label fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Shop by Category</label>
+                    <select id="categoryFilter" class="form-select category-select" onchange="filterByCategory()" 
+                            style="border: 2px solid #e9ecef; border-radius: 8px; padding: 0.75rem; font-family: 'Inter', sans-serif;">
+                        <option value="">All Categories</option>
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Categories Section -->
+<div class="featured-categories" style="padding: 4rem 0; background: white;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold text-dark mb-3" style="font-family: 'Inter', sans-serif;">Shop by Category</h2>
+            <p class="lead text-muted">Discover our curated collections</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var category in categories.Take(4))
+            {
+                <div class="col-lg-3 col-md-6">
+                    <div class="category-card" onclick="filterByCategory('@category')" 
+                         style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;">
+                        <div class="category-icon mb-3">
+                            @if (category == "Electronics")
+                            {
+                                <i class="bi bi-laptop" style="font-size: 3rem; color: #FF9900;"></i>
+                            }
+                            else if (category == "Fashion")
+                            {
+                                <i class="bi bi-bag" style="font-size: 3rem; color: #FF9900;"></i>
+                            }
+                            else if (category == "Home")
+                            {
+                                <i class="bi bi-house" style="font-size: 3rem; color: #FF9900;"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-grid-3x3-gap" style="font-size: 3rem; color: #FF9900;"></i>
+                            }
+                        </div>
+                        <h4 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">@category</h4>
+                        <p class="text-muted mb-3">Explore @category products</p>
+                        <span class="btn btn-outline-primary btn-sm">Shop Now</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products Section -->
+<div class="featured-products" style="padding: 4rem 0; background: #f8f9fa;">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="h1 fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Featured Products</h2>
+                <p class="text-muted">Handpicked favorites just for you</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                View All Products <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4" id="productGrid">
+            @foreach (var product in Model.Take(6))
+            {
+                <div class="col-lg-4 col-md-6 product-item" data-category="@product.Category">
+                    <div class="product-card h-100" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s ease; border: 1px solid #e9ecef;">
+                        <div class="product-image-container" style="position: relative; height: 250px; overflow: hidden;">
+                            @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name" class="product-image" 
+                                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" />
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center h-100" style="background: linear-gradient(45deg, #f8f9fa, #e9ecef);">
+                                    <i class="bi bi-image" style="font-size: 3rem; color: #6c757d;"></i>
+                                </div>
+                            }
+                            
+                            @if (product.StockQty <= 0)
+                            {
+                                <div class="position-absolute top-0 start-0 m-3">
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                </div>
+                            }
+                            else if (product.StockQty <= 5)
+                            {
+                                <div class="position-absolute top-0 start-0 m-3">
+                                    <span class="badge bg-warning text-dark">Limited Stock</span>
+                                </div>
+                            }
+
+                            <div class="position-absolute top-0 end-0 m-3 quick-actions" style="opacity: 0; transition: opacity 0.3s ease;">
+                                <button class="btn btn-light btn-sm rounded-circle me-2" style="width: 40px; height: 40px;" title="Add to Wishlist">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="mb-2">
+                                <span class="badge bg-light text-dark" style="font-size: 0.75rem;">@product.Category</span>
+                            </div>
+
+                            <h5 class="product-title mb-2" style="font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem; line-height: 1.3;">
+                                @product.Name
+                            </h5>
+
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center gap-1 mb-1">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        <i class="bi bi-star-fill text-warning" style="font-size: 0.8rem;"></i>
+                                    }
+                                    <small class="text-muted ms-1">(4.5)</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="h5 mb-0 text-primary fw-bold" style="font-family: 'Inter', sans-serif;">
+                                        @product.Price.ToString("C")
+                                    </span>
+                                </div>
+                                <small class="text-muted">@product.StockQty in stock</small>
+                            </div>
+
+                            <form asp-controller="CustomerCart" asp-action="AddToCart" method="post" class="add-to-cart-form">
+                                <input type="hidden" name="ProductId" value="@product.RowKey" />
+                                <input type="hidden" name="ProductName" value="@product.Name" />
+                                <input type="hidden" name="Price" value="@product.Price" />
+                                <input type="hidden" name="Quantity" value="1" />
+                                <button type="submit" class="btn btn-primary w-100 add-to-cart-btn" 
+                                        @(product.StockQty > 0 ? "" : "disabled")
+                                        style="font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 8px; padding: 0.75rem;">
+                                    @if (product.StockQty > 0)
+                                    {
+                                        <i class="bi bi-cart-plus me-2"></i><span>Add to Cart</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle me-2"></i><span>Out of Stock</span>
+                                    }
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

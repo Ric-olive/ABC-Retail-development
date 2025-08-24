@@ -1,0 +1,78 @@
+@model List<ABC_Retail.Models.Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="font-family: 'Inter', sans-serif;">
+            <i class="bi bi-box-seam me-2 text-primary"></i>My Orders
+        </h2>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+            <i class="bi bi-bag me-2"></i>Continue Shopping
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+            {
+                <div class="col-12 mb-4">
+                    <div class="card" style="border-radius: 12px; border: 1px solid #e9ecef; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                            <div>
+                                <h5 class="mb-1 fw-bold" style="font-family: 'Inter', sans-serif;">Order #@order.RowKey</h5>
+                                <small class="text-muted">Placed on @order.OrderDate.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-@(order.Status == "Completed" ? "success" : order.Status == "Processing" ? "warning" : "primary") fs-6">
+                                    @order.Status
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="mb-2">
+                                        <strong>Total Amount:</strong> 
+                                        <span class="h5 text-primary fw-bold">@order.TotalAmount.ToString("C")</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Delivery Address:</strong> @order.DeliveryAddress
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                    {
+                                        <div class="mb-2">
+                                            <strong>Tracking Number:</strong> 
+                                            <code class="bg-light px-2 py-1 rounded">@order.TrackingNumber</code>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <a asp-action="Details" asp-route-id="@order.RowKey" class="btn btn-outline-primary">
+                                        <i class="bi bi-eye me-2"></i>View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-box" style="font-size: 4rem; color: #6c757d;"></i>
+            </div>
+            <h3 class="fw-bold mb-3" style="font-family: 'Inter', sans-serif;">No orders yet</h3>
+            <p class="text-muted mb-4">You haven't placed any orders yet. Start shopping to see your orders here.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg px-5" 
+               style="background-color: #FF9900; border-color: #FF9900; border-radius: 8px;">
+                <i class="bi bi-bag-heart me-2"></i>Start Shopping
+            </a>
+        </div>
+    }
+</div>

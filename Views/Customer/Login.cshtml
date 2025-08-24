@@ -1,0 +1,199 @@
+@model ABC_Retail.Models.ViewModels.LoginCustomerViewModel
+
+@{
+    ViewData["Title"] = "Sign In - ABC Retail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container" style="min-height: 100vh; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%); display: flex; align-items: center; justify-content: center; padding: 2rem 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-9">
+                <!-- Logo Section -->
+                <div class="text-center mb-4">
+                    <div class="auth-logo" style="background: white; display: inline-block; padding: 1.5rem 3rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                        <h2 class="mb-0" style="font-family: 'Inter', sans-serif; font-weight: 700; color: #232F3E; font-size: 2rem;">
+                            <i class="bi bi-bag-heart me-2" style="color: #FF9900;"></i>ABC Retail
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Login Card -->
+                <div class="auth-card" style="background: white; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.12); padding: 3rem; border: 1px solid #e9ecef;">
+                    <div class="text-center mb-4">
+                        <h1 class="h3 fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Welcome Back</h1>
+                        <p class="text-muted">Sign in to your ABC Retail account</p>
+                    </div>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success d-flex align-items-center mb-4" style="border-radius: 8px; border: none; background: #d1edff; color: #0c5460;">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center mb-4" style="border-radius: 8px; border: none; background: #f8d7da; color: #721c24;">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form asp-action="Login" method="post" class="auth-form">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" style="border-radius: 8px;"></div>
+
+                        <!-- Email Field -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control auth-input" id="email" placeholder="name@example.com" 
+                                   style="border: 2px solid #e9ecef; border-radius: 8px; padding: 1rem; font-size: 1rem; transition: all 0.3s ease; font-family: 'Inter', sans-serif;" />
+                            <label for="email" style="color: #6c757d; font-family: 'Inter', sans-serif;">Email address</label>
+                            <span asp-validation-for="Email" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Password" class="form-control auth-input" id="password" type="password" placeholder="Password"
+                                   style="border: 2px solid #e9ecef; border-radius: 8px; padding: 1rem; font-size: 1rem; transition: all 0.3s ease; font-family: 'Inter', sans-serif;" />
+                            <label for="password" style="color: #6c757d; font-family: 'Inter', sans-serif;">Password</label>
+                            <span asp-validation-for="Password" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" style="border-radius: 4px;">
+                                <label class="form-check-label text-muted" for="rememberMe" style="font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+                                    Keep me signed in
+                                </label>
+                            </div>
+                            <a href="#" class="text-decoration-none" style="color: #FF9900; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 500;">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <!-- Sign In Button -->
+                        <button type="submit" class="btn btn-primary w-100 auth-btn mb-3" 
+                                style="background: linear-gradient(135deg, #FF9900 0%, #e68900 100%); border: none; border-radius: 8px; padding: 1rem; font-size: 1.1rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 153, 0, 0.3);">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+
+                        <!-- Divider -->
+                        <div class="text-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <hr class="flex-grow-1" style="border-color: #e9ecef;">
+                                <span class="px-3 text-muted" style="font-family: 'Inter', sans-serif; font-size: 0.9rem;">or</span>
+                                <hr class="flex-grow-1" style="border-color: #e9ecef;">
+                            </div>
+                        </div>
+
+                        <!-- Social Login Buttons -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100 social-btn" 
+                                        style="border: 2px solid #e9ecef; border-radius: 8px; padding: 0.75rem; font-family: 'Inter', sans-serif; transition: all 0.3s ease;">
+                                    <i class="bi bi-google me-2" style="color: #db4437;"></i>Google
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100 social-btn" 
+                                        style="border: 2px solid #e9ecef; border-radius: 8px; padding: 0.75rem; font-family: 'Inter', sans-serif; transition: all 0.3s ease;">
+                                    <i class="bi bi-facebook me-2" style="color: #4267B2;"></i>Facebook
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Sign Up Link -->
+                    <div class="text-center">
+                        <p class="text-muted mb-0" style="font-family: 'Inter', sans-serif;">
+                            New to ABC Retail? 
+                            <a asp-controller="Customer" asp-action="Register" class="text-decoration-none fw-bold" 
+                               style="color: #FF9900;">Create your account</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="text-center mt-4">
+                    <small class="text-muted d-flex align-items-center justify-content-center" style="font-family: 'Inter', sans-serif;">
+                        <i class="bi bi-shield-check me-2" style="color: #28a745;"></i>
+                        Your information is protected with 256-bit SSL encryption
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Auth Page Specific Styles */
+    .auth-input:focus {
+        border-color: #FF9900 !important;
+        box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1) !important;
+        outline: none;
+    }
+
+    .auth-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4) !important;
+        background: linear-gradient(135deg, #e68900 0%, #cc7700 100%) !important;
+    }
+
+    .auth-btn:active {
+        transform: translateY(0);
+    }
+
+    .social-btn:hover {
+        border-color: #FF9900 !important;
+        background-color: #fff8f0 !important;
+        transform: translateY(-1px);
+    }
+
+    .auth-card {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .auth-logo {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .auth-card {
+            padding: 2rem !important;
+            margin: 1rem !important;
+        }
+        
+        .auth-logo {
+            padding: 1rem 2rem !important;
+        }
+        
+        .auth-container {
+            padding: 1rem 0 !important;
+        }
+    }
+</style>

@@ -1,0 +1,19 @@
+﻿# Ignore build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# VS and Rider cache folders
+.vs/
+.idea/
+
+# Others
+*.log
+*.db
+*.env
+
+*.DS_Store
+

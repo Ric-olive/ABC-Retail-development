@@ -1,0 +1,482 @@
+@{
+    ViewData["Title"] = "Storage Management - ABC Retail Admin";
+}
+
+<div class="storage-dashboard" style="background: #f8f9fa; min-height: 100vh; padding: 2rem 0;">
+    <div class="container-fluid">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header mb-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="header-content">
+                        <h1 class="h2 fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">
+                            <i class="bi bi-cloud-arrow-up me-3" style="color: #FF9900;"></i>Azure Storage Management
+                        </h1>
+                        <p class="text-muted mb-0" style="font-family: 'Inter', sans-serif; font-size: 1.1rem;">
+                            Comprehensive cloud storage operations dashboard for ABC Retail
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="dashboard-actions">
+                        <button class="btn btn-outline-primary me-2" onclick="refreshDashboard()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                        </button>
+                        <div class="dropdown d-inline">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" 
+                                    style="background: linear-gradient(135deg, #FF9900 0%, #e68900 100%); border: none; font-family: 'Inter', sans-serif; font-weight: 600;">
+                                <i class="bi bi-gear me-2"></i>Quick Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("AddProduct")"><i class="bi bi-plus-circle me-2"></i>Add Product</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("UploadImage")"><i class="bi bi-cloud-upload me-2"></i>Upload Image</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ViewLogs")"><i class="bi bi-file-text me-2"></i>View Logs</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success d-flex align-items-center mb-4" style="border-radius: 12px; border: none; background: #d1edff; color: #0c5460; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <i class="bi bi-check-circle-fill me-3" style="font-size: 1.2rem;"></i>
+                <div>@TempData["Success"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger d-flex align-items-center mb-4" style="border-radius: 12px; border: none; background: #f8d7da; color: #721c24; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.2rem;"></i>
+                <div>@TempData["Error"]</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Queue Status Cards -->
+        <div class="row mb-5">
+            <div class="col-lg-6 mb-4">
+                <div class="queue-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-left: 4px solid #0d6efd; transition: all 0.3s ease;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="queue-icon" style="background: linear-gradient(135deg, #0d6efd, #0a58ca); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-cart-check" style="font-size: 1.5rem; color: white;"></i>
+                        </div>
+                        <div class="queue-status">
+                            <span class="badge bg-primary" style="font-family: 'Inter', sans-serif;">Active</span>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Order Processing Queue</h4>
+                    <div class="queue-metrics mb-3">
+                        <div class="d-flex align-items-baseline">
+                            <span class="h2 fw-bold text-primary me-2" style="font-family: 'Inter', sans-serif;">@(ViewBag.OrderQueueLength ?? 0)</span>
+                            <span class="text-muted" style="font-family: 'Inter', sans-serif;">orders pending</span>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3" style="font-family: 'Inter', sans-serif;">Process customer orders and update inventory automatically</p>
+                    <form asp-action="ProcessNextOrder" method="post" class="process-form">
+                        <button type="submit" class="btn btn-primary process-btn" 
+                                style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s ease;">
+                            <i class="bi bi-play-circle me-2"></i>Process Next Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="queue-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-left: 4px solid #ffc107; transition: all 0.3s ease;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="queue-icon" style="background: linear-gradient(135deg, #ffc107, #ffb300); width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-boxes" style="font-size: 1.5rem; color: white;"></i>
+                        </div>
+                        <div class="queue-status">
+                            <span class="badge bg-warning text-dark" style="font-family: 'Inter', sans-serif;">Active</span>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Inventory Management Queue</h4>
+                    <div class="queue-metrics mb-3">
+                        <div class="d-flex align-items-baseline">
+                            <span class="h2 fw-bold text-warning me-2" style="font-family: 'Inter', sans-serif;">@(ViewBag.InventoryQueueLength ?? 0)</span>
+                            <span class="text-muted" style="font-family: 'Inter', sans-serif;">updates pending</span>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3" style="font-family: 'Inter', sans-serif;">Manage stock levels and inventory synchronization</p>
+                    <form asp-action="ProcessNextInventoryUpdate" method="post" class="process-form">
+                        <button type="submit" class="btn btn-warning process-btn" 
+                                style="background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%); border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s ease; color: #212529;">
+                            <i class="bi bi-arrow-repeat me-2"></i>Process Next Update
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Operations Grid -->
+        <div class="storage-operations mb-5">
+            <h3 class="h4 fw-bold text-dark mb-4" style="font-family: 'Inter', sans-serif;">Storage Operations</h3>
+            <div class="row">
+                <!-- Azure Tables -->
+                <div class="col-lg-6 mb-4">
+                    <div class="storage-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid #0dcaf0; transition: all 0.3s ease; height: 100%;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="storage-icon" style="background: linear-gradient(135deg, #0dcaf0, #0aa2c0); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="bi bi-table" style="font-size: 1.25rem; color: white;"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1" style="font-family: 'Inter', sans-serif;">Azure Table Storage</h5>
+                                <small class="text-muted">NoSQL data storage</small>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-3" style="font-family: 'Inter', sans-serif;">Manage customer profiles and product information with scalable NoSQL storage</p>
+                        <div class="d-grid gap-2">
+                            <div class="action-buttons" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <a href="@Url.Action("ProcessOrder")" class="btn btn-warning btn-sm" style="border-radius: 8px; font-weight: 500; padding: 0.5rem 1rem;">
+                                    <i class="bi bi-plus-circle me-1"></i>Queue Order
+                                </a>
+                                <form asp-action="ProcessNextOrder" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-outline-warning btn-sm" style="border-radius: 8px; font-weight: 500; padding: 0.5rem 1rem;">
+                                        <i class="bi bi-play-fill me-1"></i>Process Next
+                                    </button>
+                                </form>
+                                <a href="@Url.Action("OrderShipping")" class="btn btn-success btn-sm" style="border-radius: 8px; font-weight: 500; padding: 0.5rem 1rem;">
+                                    <i class="bi bi-truck me-1"></i>Ship Order
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Azure Blob Storage -->
+                <div class="col-lg-6 mb-4">
+                    <div class="storage-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid #198754; transition: all 0.3s ease; height: 100%;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="storage-icon" style="background: linear-gradient(135deg, #198754, #146c43); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="bi bi-cloud-upload" style="font-size: 1.25rem; color: white;"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1" style="font-family: 'Inter', sans-serif;">Azure Blob Storage</h5>
+                                <small class="text-muted">Object storage service</small>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-3" style="font-family: 'Inter', sans-serif;">Upload and manage images, videos, and multimedia content securely</p>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("UploadImage")" class="btn btn-outline-success storage-action-btn">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>Upload Image
+                            </a>
+                            <button class="btn btn-outline-success storage-action-btn" disabled>
+                                <i class="bi bi-folder me-2"></i>Browse Files <small>(Coming Soon)</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Azure Queue Storage -->
+                <div class="col-lg-6 mb-4">
+                    <div class="storage-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid #ffc107; transition: all 0.3s ease; height: 100%;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="storage-icon" style="background: linear-gradient(135deg, #ffc107, #ffb300); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="bi bi-list-ul" style="font-size: 1.25rem; color: white;"></i>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                            <div class="card text-white bg-warning">
+                                <div class="card-header">
+                                    <i class="fas fa-shopping-cart"></i> Order Processing Queue
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title">@ViewBag.OrderQueueLength</h4>
+                                    <p class="card-text">Orders waiting for processing</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-white bg-info">
+                                <div class="card-header">
+                                    <i class="fas fa-boxes"></i> Inventory Management Queue
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title">@ViewBag.InventoryQueueLength</h4>
+                                    <p class="card-text">Inventory updates pending</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-white bg-success">
+                                <div class="card-header">
+                                    <i class="fas fa-route"></i> Order Lifecycle Queue
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title">@ViewBag.LifecycleQueueLength</h4>
+                                    <p class="card-text">Order status changes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-white bg-primary">
+                                <div class="card-header">
+                                    <i class="fas fa-user-shield"></i> Admin Activity Queue
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title">@ViewBag.AdminActivityQueueLength</h4>
+                                    <p class="card-text">Admin actions logged</p>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+                <!-- Azure Files -->
+                <div class="col-lg-6 mb-4">
+                    <div class="storage-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid #6c757d; transition: all 0.3s ease; height: 100%;">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="storage-icon" style="background: linear-gradient(135deg, #6c757d, #5a6268); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="bi bi-file-earmark-text" style="font-size: 1.25rem; color: white;"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1" style="font-family: 'Inter', sans-serif;">Azure File Storage</h5>
+                                <small class="text-muted">Managed file shares</small>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-3" style="font-family: 'Inter', sans-serif;">View and manage application log files and system documentation</p>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("ViewLogs")" class="btn btn-outline-secondary storage-action-btn">
+                                <i class="bi bi-file-text me-2"></i>View Log Files
+                            </a>
+                            <div class="mt-2 p-2" style="background: #f8f9fa; border-radius: 6px;">
+                                <small class="text-muted d-flex align-items-center" style="font-family: 'Inter', sans-serif;">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Total log files: <strong class="ms-1">@(ViewBag.LogFiles?.Count ?? 0)</strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Overview -->
+        <div class="storage-overview">
+            <h3 class="h4 fw-bold text-dark mb-4" style="font-family: 'Inter', sans-serif;">Storage Operations Overview</h3>
+            <div class="overview-card" style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <div class="row text-center">
+                    <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                        <div class="overview-item" style="padding: 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); transition: all 0.3s ease;">
+                            <div class="overview-icon mb-3">
+                                <i class="bi bi-table" style="font-size: 2.5rem; color: #0dcaf0;"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Table Storage</h6>
+                            <p class="text-muted small mb-0" style="font-family: 'Inter', sans-serif;">Customer & Product Data</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                        <div class="overview-item" style="padding: 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); transition: all 0.3s ease;">
+                            <div class="overview-icon mb-3">
+                                <i class="bi bi-cloud-upload" style="font-size: 2.5rem; color: #198754;"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Blob Storage</h6>
+                            <p class="text-muted small mb-0" style="font-family: 'Inter', sans-serif;">Images & Media Files</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                        <div class="overview-item" style="padding: 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); transition: all 0.3s ease;">
+                            <div class="overview-icon mb-3">
+                                <i class="bi bi-list-ul" style="font-size: 2.5rem; color: #ffc107;"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">Queue Storage</h6>
+                            <p class="text-muted small mb-0" style="font-family: 'Inter', sans-serif;">Order & Inventory Processing</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="overview-item" style="padding: 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); transition: all 0.3s ease;">
+                            <div class="overview-icon mb-3">
+                                <i class="bi bi-file-earmark-text" style="font-size: 2.5rem; color: #6c757d;"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2" style="font-family: 'Inter', sans-serif;">File Storage</h6>
+                            <p class="text-muted small mb-0" style="font-family: 'Inter', sans-serif;">Application Logs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Storage Dashboard Styles */
+    .queue-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+    }
+
+    .storage-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+    }
+
+    .storage-action-btn {
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-width: 2px;
+    }
+
+    .storage-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .process-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
+    }
+
+    .process-btn:active {
+        transform: translateY(0);
+    }
+
+    .overview-item:hover {
+        transform: translateY(-3px);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-header {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .queue-card {
+        animation: slideInLeft 0.6s ease-out;
+    }
+
+    .storage-card {
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .overview-card {
+        animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .storage-dashboard {
+            padding: 1rem 0 !important;
+        }
+        
+        .queue-card,
+        .storage-card {
+            padding: 1.5rem !important;
+        }
+        
+        .dashboard-actions {
+            margin-top: 1rem;
+        }
+        
+        .overview-card {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
+<script>
+    // Dashboard functionality
+    function refreshDashboard() {
+        const btn = event.target;
+        const originalContent = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Refreshing...';
+        btn.disabled = true;
+        
+        // Simulate refresh
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+            
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.style.cssText = 'border-radius: 12px; border: none; background: #d1edff; color: #0c5460; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+            alertDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill me-3" style="font-size: 1.2rem;"></i>
+                <div>Dashboard refreshed successfully!</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            const header = document.querySelector('.dashboard-header');
+            container.insertBefore(alertDiv, header.nextSibling);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }, 1500);
+    }
+
+    // Add loading states to process buttons
+    document.querySelectorAll('.process-form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const btn = this.querySelector('.process-btn');
+            const originalContent = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Processing...';
+            btn.disabled = true;
+        });
+    });
+
+    // Initialize tooltips if Bootstrap is available
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof bootstrap !== 'undefined') {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    });
+</script>
